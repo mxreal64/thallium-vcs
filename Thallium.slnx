@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="Thallium.Cli/Thallium.Cli.csproj" />
+  <Project Path="Thallium.Core/Thallium.Core.fsproj" />
+  <Project Path="Thallium.JsonRpc/Thallium.JsonRpc.csproj" />
+  <Project Path="Thallium.Tests/Thallium.Tests.fsproj" />
+</Solution>

@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>Thallium.Core</RootNamespace>
+    <AssemblyName>Thallium.Core</AssemblyName>
+    <Nullable>enable</Nullable>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="Domain.fs" />
+    <Compile Include="ObjectStore.fs" />
+    <Compile Include="Ledger.fs" />
+    <Compile Include="IntentResolver.fs" />
+    <Compile Include="SandboxManager.fs" />
+    <Compile Include="SandboxRunner.fs" />
+    <Compile Include="MergeEngine.fs" />
+    <Compile Include="DiffEngine.fs" />
+    <Compile Include="ContextEngine.fs" />
+    <Compile Include="Repository.fs" />
+    <Compile Include="GitBridge.fs" />
+    <Compile Include="GarbageCollector.fs" />
+    <Compile Include="DashboardServer.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FSharp.SystemTextJson" Version="1.3.13" />
+  </ItemGroup>
+
+</Project>
