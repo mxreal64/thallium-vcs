@@ -38,7 +38,7 @@ Thallium is a **layered** VCS — it can sit on top of Git (via `tl git`) or **r
 ### install
 
 ```bash
-git clone https://github.com/mxreal64/thallium
+git clone https://github.com/mxreal64/thallium-vcs
 cd thallium
 bash build.sh
 
