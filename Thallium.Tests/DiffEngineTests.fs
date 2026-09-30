@@ -55,7 +55,8 @@ let z = 4"))
               Author = "alice"
               Summary = "Init"
               Changes = [ { Path = "test.fs"; OldBlob = None; NewBlob = Some blobA; Intent = Add; Annotation = None } ]
-              FromSandbox = None }
+              FromSandbox = None
+              AgentData = None }
         append ledger tx1
 
         let tx2 =
@@ -65,7 +66,8 @@ let z = 4"))
               Author = "bob"
               Summary = "Update"
               Changes = [ { Path = "test.fs"; OldBlob = Some blobA; NewBlob = Some blobB; Intent = Modify; Annotation = None } ]
-              FromSandbox = None }
+              FromSandbox = None
+              AgentData = None }
         append ledger tx2
 
         let diffs = diffTransactions objDir ledger tx1.TxId tx2.TxId

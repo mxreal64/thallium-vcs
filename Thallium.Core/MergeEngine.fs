@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: MPL-2.0
 
 module Thallium.Core.MergeEngine
 
@@ -18,8 +17,7 @@ type private PathMerge =
 
 
 let private lineTokens (data: byte[]) : string[] =
-    Text.Encoding.UTF8.GetString(data).Split('
-')
+    Text.Encoding.UTF8.GetString(data).Split('\n')
 
 let private tryTextMerge (baseBytes: byte[]) (oursBytes: byte[]) (theirsBytes: byte[]) : byte[] option =
     let baseLines   = lineTokens baseBytes
@@ -44,8 +42,7 @@ let private tryTextMerge (baseBytes: byte[]) (oursBytes: byte[]) (theirsBytes: b
                 if Set.contains i changedByOurs && i < oursLines.Length
                 then oursLines.[i]
                 else line)
-        Some (Text.Encoding.UTF8.GetBytes(String.concat "
-" merged))
+        Some (Text.Encoding.UTF8.GetBytes(String.concat "\n" merged))
     else
         None 
 
@@ -109,7 +106,7 @@ let merge
               Author      = mergeAuthor
               Summary     = $"Auto-merged: '{txA.Summary}' + '{txB.Summary}'"
               Changes     = nonConflict |> List.map (fun fc -> { fc with Intent = MergedByEngine })
-              FromSandbox = None }
+              FromSandbox = None; AgentData = None }
         append ledgerPath merged
         AutoMerged merged
     else
@@ -195,7 +192,7 @@ let merge
                   Author      = mergeAuthor
                   Summary     = $"Auto-merged (intent-aware): '{txA.Summary}' + '{txB.Summary}'"
                   Changes     = allChanges
-                  FromSandbox = None }
+                  FromSandbox = None; AgentData = None }
             append ledgerPath merged
             AutoMerged merged
         else

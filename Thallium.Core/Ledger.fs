@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: MPL-2.0
 
 module Thallium.Core.Ledger
 
@@ -26,8 +25,7 @@ let private writeFrame (stream: Stream) (payload: byte[]) =
     let lenBytes = BitConverter.GetBytes(payload.Length)
     stream.Write(lenBytes, 0, 4)
     stream.Write(payload, 0, payload.Length)
-    stream.WriteByte(byte '
-')
+    stream.WriteByte(byte '\n')
 
 let private readAllFrames (stream: Stream) : byte[] list =
     let mutable frames = []

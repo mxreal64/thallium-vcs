@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: MPL-2.0
 
 module Thallium.Core.Domain
 
@@ -42,21 +41,23 @@ type FileChange =
       Annotation  : string option }
 
 
+type AgentMetadata =
+    { Model            : string
+      Prompt           : string
+      ReasoningSummary : string option
+      TokensUsed       : int option
+      Temperature      : float option
+      SessionId        : string option }
+
 type Transaction =
-    {
-      TxId        : TxId
-     
+    { TxId        : TxId
       ParentId    : TxId option
-     
       Timestamp   : DateTimeOffset
-     
       Author      : string
-     
       Summary     : string
-     
       Changes     : FileChange list
-     
-      FromSandbox : SandboxId option }
+      FromSandbox : SandboxId option
+      AgentData   : AgentMetadata option }
 
 
 type SandboxState =

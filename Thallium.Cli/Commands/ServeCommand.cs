@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: MPL-2.0
 using System.CommandLine;
 using Spectre.Console;
 using System.Diagnostics;

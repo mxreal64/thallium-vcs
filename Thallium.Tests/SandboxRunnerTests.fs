@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: MPL-2.0
 
 module Thallium.Tests.SandboxRunnerTests
 
@@ -33,7 +32,7 @@ let ``runTestInSandbox executes custom command and returns exit code and output`
               Author = "tester"
               Summary = "genesis"
               Changes = []
-              FromSandbox = None }
+              FromSandbox = None; AgentData = None }
         append ledger genesis
 
         let sb = create genesis.TxId (TimeSpan.FromMinutes 5.0)
@@ -59,7 +58,7 @@ let ``runTestInSandbox captures failure exit code`` () =
               Author = "tester"
               Summary = "genesis"
               Changes = []
-              FromSandbox = None }
+              FromSandbox = None; AgentData = None }
         append ledger genesis
 
         let sb = create genesis.TxId (TimeSpan.FromMinutes 5.0)

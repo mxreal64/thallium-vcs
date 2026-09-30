@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: MPL-2.0
 
 module Thallium.Core.ContextEngine
 
@@ -16,8 +15,8 @@ module private Patterns =
     let fsharpType   = Regex(@"^type\s+(?<name>\w+)", RegexOptions.Multiline)
     let fsharpModule = Regex(@"^module\s+(?<name>[\w.]+)", RegexOptions.Multiline)
    
-    let csharpMethod = Regex(@"(?:public|private|protected|internal|static|async).*?\s+(?<name>\w+)\s*\(", RegexOptions.Multiline)
-    let csharpClass  = Regex(@"class\s+(?<name>\w+)", RegexOptions.Multiline)
+    let csharpMethod = Regex(@"\b(?:public|private|protected|internal|static|async).*?\s+(?<name>\w+)\s*\(", RegexOptions.Multiline)
+    let csharpClass  = Regex(@"\bclass\s+(?<name>\w+)", RegexOptions.Multiline)
     let rustFn       = Regex(@"^(?:pub\s+)?fn\s+(?<name>\w+)", RegexOptions.Multiline)
     let goFunc       = Regex(@"^func\s+(?<name>\w+)", RegexOptions.Multiline)
     let pyDef        = Regex(@"^def\s+(?<name>\w+)|^class\s+(?<name>\w+)", RegexOptions.Multiline)
@@ -38,8 +37,7 @@ let private kindForPattern (r: Regex) =
     else "function"
 
 let private extractSymbols (filePath: string) (text: string) : (string * string * int * int * string) list =
-    let lines    = text.Split('
-')
+    let lines    = text.Split('\n')
     let ext      = Path.GetExtension(filePath)
     let patterns = patternsForExt ext
 
@@ -50,8 +48,7 @@ let private extractSymbols (filePath: string) (text: string) : (string * string 
             |> Seq.map (fun m ->
                 let name = m.Groups.["name"].Value
                 let kind = kindForPattern pat
-                let startLine = text.[..m.Index].Split('
-').Length
+                let startLine = text.[..m.Index].Split('\n').Length
                 name, kind, startLine)
             |> Seq.toList)
         |> List.distinctBy (fun (name, _, startLine) -> name, startLine)
@@ -68,8 +65,7 @@ let private extractSymbols (filePath: string) (text: string) : (string * string 
         let body =
             let s = max 0 (startLine - 1)
             let e = min (lines.Length - 1) (endLine - 1)
-            lines.[s..e] |> String.concat "
-"
+            lines.[s..e] |> String.concat "\n"
         name, kind, startLine, endLine, body)
 
 
@@ -85,7 +81,7 @@ let private matchesHint (hint: string option) (path: string) =
     match hint with
     | None   -> true
     | Some h ->
-        let norm = path.Replace('\', '/').ToLowerInvariant()
+        let norm = path.Replace('\\', '/').ToLowerInvariant()
         norm.Contains(h.ToLowerInvariant())
 
 

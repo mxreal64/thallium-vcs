@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: MPL-2.0
 
 module Thallium.Core.GitBridge
 
@@ -42,8 +41,7 @@ let private parseGitLog (gitRepoDir: string) : Result<GitCommitInfo list, string
     match runProcess gitRepoDir "git" "log --reverse --format=\"%H|%P|%an <%ae>|%aI|%s\"" with
     | Error err -> Error err
     | Ok output ->
-        let lines = output.Split('
-', StringSplitOptions.RemoveEmptyEntries)
+        let lines = output.Split('\n', StringSplitOptions.RemoveEmptyEntries)
         let commits =
             lines
             |> Seq.choose (fun line ->
@@ -88,7 +86,7 @@ let importGitRepo (gitRepoDir: string) (targetTlDir: string) : Result<int, strin
                 let currentFiles = System.Collections.Generic.Dictionary<string, BlobId>()
 
                 for entry in entries do
-                    let tabIdx = entry.IndexOf('	')
+                    let tabIdx = entry.IndexOf('\t')
                     if tabIdx > 0 then
                         let meta = entry.[..tabIdx - 1]
                         let filePath = entry.[tabIdx + 1..]
@@ -140,7 +138,7 @@ let importGitRepo (gitRepoDir: string) (targetTlDir: string) : Result<int, strin
                       Author = gitCommit.Author
                       Summary = summary
                       Changes = resolvedChanges
-                      FromSandbox = None }
+                      FromSandbox = None; AgentData = None }
 
                 append p.LedgerPath tx
                 writeHead p tx.TxId
@@ -176,11 +174,11 @@ let exportToGit (tlRepoDir: string) (targetGitDir: string) : Result<int, string>
        
         let existingFiles =
             Directory.EnumerateFiles(targetGitDir, "*", SearchOption.AllDirectories)
-            |> Seq.filter (fun f -> not (f.Contains("/.git/") || f.Contains("\.git\")))
+            |> Seq.filter (fun f -> not (f.Contains("/.git/") || f.Contains("\\.git\\")))
             |> Seq.toList
 
         for f in existingFiles do
-            let rel = Path.GetRelativePath(targetGitDir, f).Replace('\', '/')
+            let rel = Path.GetRelativePath(targetGitDir, f).Replace('\\', '/')
             if not (Map.containsKey rel tree) then
                 File.Delete(f)
 
@@ -198,38 +196,8 @@ let exportToGit (tlRepoDir: string) (targetGitDir: string) : Result<int, string>
        
         let _ = runProcess targetGitDir "git" "add -A"
         let authorEnv = $"GIT_AUTHOR_NAME=\"{tx.Author}\" GIT_AUTHOR_DATE=\"{tx.Timestamp:O}\" GIT_COMMITTER_NAME=\"{tx.Author}\" GIT_COMMITTER_DATE=\"{tx.Timestamp:O}\""
-        let safeMsg = tx.Summary.Replace("\"", "\\"")
-        let _ = runProcess targetGitDir "bash" $"-c \"{authorEnv} git commit --allow-empty -m \\"{safeMsg}\\"\""
+        let safeMsg = tx.Summary.Replace("\"", "\\\"")
+        let _ = runProcess targetGitDir "bash" $"-c \"{authorEnv} git commit --allow-empty -m \\\"{safeMsg}\\\"\""
         exportedCount <- exportedCount + 1
 
     Ok exportedCount
-
-
-let cloneGitRepo (gitUrl: string) (targetDir: string) : Result<int, string> =
-    let tempDir = Path.Combine(Path.GetTempPath(), "tl_clone_" + Guid.NewGuid().ToString("N"))
-    Directory.CreateDirectory tempDir |> ignore
-    try
-        match runProcess "." "git" $"clone {gitUrl} \"{tempDir}\"" with
-        | Error err -> Error $"git clone failed: {err}"
-        | Ok _ ->
-            if not (Directory.Exists targetDir) then
-                Directory.CreateDirectory targetDir |> ignore
-            importGitRepo tempDir targetDir
-    finally
-        try if Directory.Exists tempDir then Directory.Delete(tempDir, true) with _ -> ()
-
-let syncGitRepo (repoDir: string) : Result<string, string> =
-    let p = requireRoot repoDir
-    let gitDir = Path.Combine(p.Root, ".git")
-    if Directory.Exists gitDir then
-       
-        match importGitRepo p.Root p.Root with
-        | Error err -> Error $"Failed to import upstream Git changes: {err}"
-        | Ok imported ->
-           
-            match exportToGit p.Root p.Root with
-            | Error err -> Error $"Failed to export to Git: {err}"
-            | Ok exported ->
-                Ok $"Synchronized successfully: {imported} imported from Git, {exported} synced to Git."
-    else
-        Error "No companion .git directory found in repository root. Use 'tl git export <dir>' to create one."

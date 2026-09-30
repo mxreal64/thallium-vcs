@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: MPL-2.0
 
 module Thallium.Tests.LedgerTests
 
@@ -16,7 +15,7 @@ let private makeTx (parentId: TxId option) author summary : Transaction =
       Author      = author
       Summary     = summary
       Changes     = []
-      FromSandbox = None }
+      FromSandbox = None; AgentData = None }
 
 let private withTempFile f =
     let path = Path.GetTempFileName()

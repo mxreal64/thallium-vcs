@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: MPL-2.0
 
 module Thallium.Tests.IntentResolverTests
 
@@ -39,10 +38,8 @@ let ``AIGenerated wraps Add for agent author`` () =
 
 [<Fact>]
 let ``Modify intent when content differs substantially`` () =
-    let aText = String.replicate 100 "original content line
-"
-    let bText = String.replicate 100 "completely different data
-"
+    let aText = String.replicate 100 "original content line\n"
+    let bText = String.replicate 100 "completely different data\n"
     let aBid = blob aText
     let bBid = blob bText
     let store = Map.ofList [aBid, textBytes aText; bBid, textBytes bText]
@@ -52,8 +49,7 @@ let ``Modify intent when content differs substantially`` () =
 
 [<Fact>]
 let ``Cross-file move detection`` () =
-    let content = "let shared = 42
-"
+    let content = "let shared = 42\n"
     let bid = blob content
     let store = Map.ofList [bid, textBytes content]
 

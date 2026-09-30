@@ -14,12 +14,15 @@
     <Compile Include="ObjectStore.fs" />
     <Compile Include="Ledger.fs" />
     <Compile Include="IntentResolver.fs" />
+    <Compile Include="PolicyEngine.fs" />
     <Compile Include="SandboxManager.fs" />
     <Compile Include="SandboxRunner.fs" />
-    <Compile Include="MergeEngine.fs" />
+    <Compile Include="TournamentEngine.fs" />
     <Compile Include="DiffEngine.fs" />
+    <Compile Include="MergeEngine.fs" />
     <Compile Include="ContextEngine.fs" />
     <Compile Include="Repository.fs" />
+    <Compile Include="RemoteSync.fs" />
     <Compile Include="GitBridge.fs" />
     <Compile Include="GarbageCollector.fs" />
     <Compile Include="DashboardServer.fs" />

@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: MPL-2.0
 
 module Thallium.Benchmarks
 
@@ -29,8 +28,7 @@ let runBenchmark () =
     printfn "================================================================================"
     printfn " Runtime: .NET 10.0 | Architecture: x64 | OS: Linux"
     printfn " Timestamp: %s" (DateTimeOffset.UtcNow.ToString("o"))
-    printfn "================================================================================
-"
+    printfn "================================================================================\n"
 
    
     let blobCount = 5000
@@ -53,8 +51,7 @@ let runBenchmark () =
         ()
     sw.Stop()
     let blobReadThroughput = float blobCount / (float sw.ElapsedMilliseconds / 1000.0)
-    printfn "    • Read Throughput:            %.2f ops/sec (%.3f ms/op)
-" blobReadThroughput (float sw.ElapsedMilliseconds / float blobCount)
+    printfn "    • Read Throughput:            %.2f ops/sec (%.3f ms/op)\n" blobReadThroughput (float sw.ElapsedMilliseconds / float blobCount)
 
    
     let sandboxCount = 10000
@@ -68,8 +65,7 @@ let runBenchmark () =
     printfn "[2] ZERO-COPY MICRO-SANDBOX PROVISIONING"
     printfn "    • Sandboxes Provisioned:      %d ephemeral COW instances" sandboxCount
     printfn "    • Elapsed Time:               %d ms" sw.ElapsedMilliseconds
-    printfn "    • Creation Latency:           %.4f ms/sandbox (%.0f sandboxes/sec)
-" (float sw.ElapsedMilliseconds / float sandboxCount) sbThroughput
+    printfn "    • Creation Latency:           %.4f ms/sandbox (%.0f sandboxes/sec)\n" (float sw.ElapsedMilliseconds / float sandboxCount) sbThroughput
 
    
     let txCount = 2000
@@ -83,7 +79,7 @@ let runBenchmark () =
               Author      = if i % 2 = 0 then "agent:claude" else "human:alice"
               Summary     = $"Transaction batch commit #{i}"
               Changes     = [ { Path = $"src/module_{i % 50}.fs"; OldBlob = None; NewBlob = Some sampleBid; Intent = Add; Annotation = None } ]
-              FromSandbox = None }
+              FromSandbox = None; AgentData = None }
         append ledger tx
         parentId <- Some tx.TxId
     sw.Stop()
@@ -91,8 +87,7 @@ let runBenchmark () =
     printfn "[3] APPEND-ONLY TRANSACTION LEDGER (Binary Length-Prefixed Frames)"
     printfn "    • Transactions Appended:      %d commits" txCount
     printfn "    • Elapsed Time:               %d ms" sw.ElapsedMilliseconds
-    printfn "    • Commit Throughput:          %.2f tx/sec (%.3f ms/tx)
-" ledgerThroughput (float sw.ElapsedMilliseconds / float txCount)
+    printfn "    • Commit Throughput:          %.2f tx/sec (%.3f ms/tx)\n" ledgerThroughput (float sw.ElapsedMilliseconds / float txCount)
 
    
     printfn "[4] DETERMINISTIC DAG TREE RECONSTRUCTION (resolveTree)"
@@ -121,18 +116,17 @@ let runBenchmark () =
     printfn "[5] SEMANTIC INTENT CLASSIFICATION & CROSS-FILE MOVE DETECTION"
     printfn "    • Move Evaluations:           %d diff pairs" (intentIterations * 2)
     printfn "    • Elapsed Time:               %d ms" sw.ElapsedMilliseconds
-    printfn "    • Evaluation Latency:         %.4f ms/pair (%.0f pairs/sec)
-" (float sw.ElapsedMilliseconds / float (intentIterations * 2)) (float (intentIterations * 2) / (float sw.ElapsedMilliseconds / 1000.0))
+    printfn "    • Evaluation Latency:         %.4f ms/pair (%.0f pairs/sec)\n" (float sw.ElapsedMilliseconds / float (intentIterations * 2)) (float (intentIterations * 2) / (float sw.ElapsedMilliseconds / 1000.0))
 
    
     let mergeIterations = 1000
     let baseTx = allTxs.[0]
     let txA =
         { TxId = TxId (Guid.NewGuid().ToString("N")); ParentId = Some baseTx.TxId; Timestamp = DateTimeOffset.UtcNow
-          Author = "alice"; Summary = "Edit module 1"; Changes = [{ Path = "src/mod1.fs"; OldBlob = None; NewBlob = Some sampleBid; Intent = Add; Annotation = None }]; FromSandbox = None }
+          Author = "alice"; Summary = "Edit module 1"; Changes = [{ Path = "src/mod1.fs"; OldBlob = None; NewBlob = Some sampleBid; Intent = Add; Annotation = None }]; FromSandbox = None; AgentData = None }
     let txB =
         { TxId = TxId (Guid.NewGuid().ToString("N")); ParentId = Some baseTx.TxId; Timestamp = DateTimeOffset.UtcNow
-          Author = "bob"; Summary = "Edit module 2"; Changes = [{ Path = "src/mod2.fs"; OldBlob = None; NewBlob = Some sampleBid; Intent = Add; Annotation = None }]; FromSandbox = None }
+          Author = "bob"; Summary = "Edit module 2"; Changes = [{ Path = "src/mod2.fs"; OldBlob = None; NewBlob = Some sampleBid; Intent = Add; Annotation = None }]; FromSandbox = None; AgentData = None }
     append ledger txA
     append ledger txB
 
@@ -144,8 +138,7 @@ let runBenchmark () =
     printfn "[6] LOGICAL SET-UNION MERGE ENGINE"
     printfn "    • Merge Executions:           %d 3-way merges" mergeIterations
     printfn "    • Elapsed Time:               %d ms" sw.ElapsedMilliseconds
-    printfn "    • Merge Latency:              %.4f ms/merge (%.0f merges/sec)
-" (float sw.ElapsedMilliseconds / float mergeIterations) (float mergeIterations / (float sw.ElapsedMilliseconds / 1000.0))
+    printfn "    • Merge Latency:              %.4f ms/merge (%.0f merges/sec)\n" (float sw.ElapsedMilliseconds / float mergeIterations) (float mergeIterations / (float sw.ElapsedMilliseconds / 1000.0))
 
    
    
@@ -160,8 +153,7 @@ let runBenchmark () =
     printfn "    • Orphaned Blobs Pruned:      %d objects" gcRes.PrunedBlobsCount
     printfn "    • Active Blobs Retained:      %d objects" gcRes.TotalBlobsAfter
     printfn "    • Disk Space Reclaimed:       %d bytes" gcRes.BytesReclaimed
-    printfn "    • GC Sweep Latency:           %d ms
-" sw.ElapsedMilliseconds
+    printfn "    • GC Sweep Latency:           %d ms\n" sw.ElapsedMilliseconds
 
     printfn "================================================================================"
     printfn "                              BENCHMARK SUMMARY                                 "

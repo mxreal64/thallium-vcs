@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MPL-2.0
+
 
 using System.CommandLine;
 using Thallium.Cli.Commands;
@@ -14,6 +14,11 @@ rootCmd.AddCommand(CheckoutCommand.Build());
 rootCmd.AddCommand(RollbackCommand.Build());
 rootCmd.AddCommand(MergeCommand.Build());
 rootCmd.AddCommand(SandboxCommand.Build());
+rootCmd.AddCommand(TournamentCommand.Build());
+rootCmd.AddCommand(PolicyCommand.Build());
+rootCmd.AddCommand(RemoteCommand.BuildRemoteCmd());
+rootCmd.AddCommand(RemoteCommand.BuildPushCmd());
+rootCmd.AddCommand(RemoteCommand.BuildPullCmd());
 rootCmd.AddCommand(GitCommand.Build());
 rootCmd.AddCommand(GcCommand.Build());
 rootCmd.AddCommand(DashboardCommand.Build());

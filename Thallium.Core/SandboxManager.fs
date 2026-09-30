@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MPL-2.0
+
 module Thallium.Core.SandboxManager
 
 open System
@@ -181,7 +181,7 @@ let commit
           Author      = author
           Summary     = summary
           Changes     = resolvedChanges
-          FromSandbox = Some sb.SandboxId }
+          FromSandbox = Some sb.SandboxId; AgentData = None }
 
     append ledgerPath tx
     tx

@@ -1,9 +1,7 @@
-// SPDX-License-Identifier: MPL-2.0
 using System.CommandLine;
 using Spectre.Console;
 using Thallium.Core;
 using Microsoft.FSharp.Core;
-using Microsoft.FSharp.Collections;
 
 namespace Thallium.Cli.Commands;
 
@@ -56,8 +54,6 @@ public static class MergeCommand {
                     var cards = ((Domain.MergeResult.NeedsReview)result).Item;
                     AnsiConsole.MarkupLine($"[yellow]⚠ Merge needs review — {cards.Length} conflict(s)[/]");
 
-                    var resolvedChanges = new List<Domain.FileChange>();
-
                     foreach (var card in cards) {
                         AnsiConsole.Write(new Rule($"[red]Conflict: {card.ConflictPath}[/]"));
                         AnsiConsole.MarkupLine($"[dim]{card.Rationale}[/]");
@@ -67,34 +63,9 @@ public static class MergeCommand {
                                 .Title("Choose resolution:")
                                 .AddChoices(card.OptionA.Label, card.OptionB.Label, card.OptionC.Label));
 
-                        AnsiConsole.MarkupLine($"  Chose: [bold green]{choice}[/]");
-
-                        Domain.ChoiceOption selectedOpt;
-                        if (choice == card.OptionA.Label) selectedOpt = card.OptionA;
-                        else if (choice == card.OptionB.Label) selectedOpt = card.OptionB;
-                        else selectedOpt = card.OptionC;
-
-                        foreach (var fc in selectedOpt.Changes) {
-                            resolvedChanges.Add(fc);
-                        }
+                        AnsiConsole.MarkupLine($"  Chose: [bold]{choice}[/]");
+                       
                     }
-
-                   
-                    var resolvedTx = new Domain.Transaction(
-                        Domain.TxId.NewTxId(Guid.NewGuid().ToString("N")),
-                        FSharpOption<Domain.TxId>.Some(theirTx.TxId),
-                        DateTimeOffset.UtcNow,
-                        author,
-                        $"Resolved merge of '{theirTx.Summary}'",
-                        ListModule.OfSeq(resolvedChanges),
-                        FSharpOption<Domain.SandboxId>.None
-                    );
-
-                    Ledger.append(p.LedgerPath, resolvedTx);
-                    Repository.writeHead(p, resolvedTx.TxId);
-                    Repository.checkout(p, resolvedTx.TxId);
-
-                    AnsiConsole.MarkupLine($"[green]✓ Merge resolved & committed[/] → transaction [bold]{((Domain.TxId)resolvedTx.TxId).Item[..8]}[/]");
                 }
                 else {
                     var reason = ((Domain.MergeResult.Incompatible)result).Item;

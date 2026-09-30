@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: MPL-2.0
 
 
 using System;
@@ -198,7 +197,52 @@ static Task<JsonObject> SandboxCommit(Repository.RepoPaths paths, JsonObject? pr
     if (FSharpOption<Domain.SandboxState>.get_IsNone(sb))
         throw new RpcException(-32603, "Sandbox not found or expired.");
 
+    // Extract optional AgentMetadata
+    Domain.AgentMetadata? agentData = null;
+    var agentNode = prms?["agent_metadata"] as JsonObject;
+    if (agentNode != null) {
+        var model = agentNode["model"]?.ToString() ?? "agent:unspecified";
+        var prompt = agentNode["prompt"]?.ToString() ?? "";
+        var reasoning = agentNode["reasoning_summary"]?.ToString();
+        var tokens = agentNode["tokens_used"]?.GetValue<int>();
+        var temp = agentNode["temperature"]?.GetValue<double>();
+        var sess = agentNode["session_id"]?.ToString();
+
+        agentData = new Domain.AgentMetadata(
+            model,
+            prompt,
+            reasoning != null ? FSharpOption<string>.Some(reasoning) : FSharpOption<string>.None,
+            tokens.HasValue ? FSharpOption<int>.Some(tokens.Value) : FSharpOption<int>.None,
+            temp.HasValue ? FSharpOption<double>.Some(temp.Value) : FSharpOption<double>.None,
+            sess != null ? FSharpOption<string>.Some(sess) : FSharpOption<string>.None
+        );
+    }
+
     var tx = SandboxManager.commit(paths.ObjectsDir, paths.LedgerPath, sb.Value, author, message);
+
+    if (agentData != null) {
+        tx = new Domain.Transaction(
+            tx.TxId,
+            tx.ParentId,
+            tx.Timestamp,
+            tx.Author,
+            tx.Summary,
+            tx.Changes,
+            tx.FromSandbox,
+            FSharpOption<Domain.AgentMetadata>.Some(agentData)
+        );
+    }
+
+    // Policy check
+    var policyOpt = PolicyEngine.loadPolicy(paths.TlDir);
+    if (FSharpOption<PolicyEngine.RepoPolicy>.get_IsSome(policyOpt)) {
+        var valRes = PolicyEngine.validateTransaction(policyOpt.Value, tx);
+        if (valRes.IsError) {
+            var errors = valRes.ErrorValue;
+            throw new RpcException(-32000, $"Policy violation: {string.Join("; ", errors)}");
+        }
+    }
+
     Repository.writeHead(paths, tx.TxId);
     SandboxManager.removeFromRepo(paths.TlDir, id);
 

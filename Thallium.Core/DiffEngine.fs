@@ -30,15 +30,12 @@ type FileDiff =
       Deletions  : int }
 
 let computeLineDiff (oldText: string) (newText: string) : DiffLine list =
-    let oldLines = if String.IsNullOrEmpty oldText then [||] else oldText.Split('
-')
-    let newLines = if String.IsNullOrEmpty newText then [||] else newText.Split('
-')
+    let oldLines = if String.IsNullOrEmpty oldText then [||] else oldText.Split('\n')
+    let newLines = if String.IsNullOrEmpty newText then [||] else newText.Split('\n')
 
     let n = oldLines.Length
     let m = newLines.Length
 
-   
     let dp = Array2D.zeroCreate (n + 1) (m + 1)
     for i in 1 .. n do
         for j in 1 .. m do

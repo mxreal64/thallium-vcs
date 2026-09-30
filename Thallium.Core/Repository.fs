@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: MPL-2.0
 
 module Thallium.Core.Repository
 
@@ -109,7 +108,7 @@ let init (workDir: string) (authorName: string) : Transaction =
           Author      = authorName
           Summary     = "Initial commit (genesis)"
           Changes     = []
-          FromSandbox = None }
+          FromSandbox = None; AgentData = None }
 
     append p.LedgerPath genesis
     writeHead p genesis.TxId
@@ -135,15 +134,10 @@ let stageAll (p: RepoPaths) =
         | Some id -> Ledger.resolveTree p.LedgerPath id
 
    
-    let isIgnored (f: string) =
-        let rel = Path.GetRelativePath(p.Root, f).Replace('\', '/')
-        rel.StartsWith(".tl/") || rel.StartsWith(".git/") || rel.StartsWith("bin/") || rel.StartsWith("obj/") ||
-        rel.Contains("/.tl/") || rel.Contains("/.git/") || rel.Contains("/bin/") || rel.Contains("/obj/")
-
     let workFiles =
         Directory.EnumerateFiles(p.Root, "*", SearchOption.AllDirectories)
-        |> Seq.filter (fun f -> not (isIgnored f))
-        |> Seq.map (fun f -> Path.GetRelativePath(p.Root, f).Replace('\', '/'))
+        |> Seq.filter (fun f -> not (f.Contains(Path.Combine(".tl" + string Path.DirectorySeparatorChar)) || f.Contains("/.tl/")))
+        |> Seq.map (fun f -> Path.GetRelativePath(p.Root, f).Replace('\\', '/'))
         |> Set.ofSeq
 
     let trackedPaths = headTree |> Map.keys |> Set.ofSeq
@@ -201,7 +195,7 @@ let commit (p: RepoPaths) (author: string) (message: string) : Transaction optio
               Author      = author
               Summary     = summary
               Changes     = changes
-              FromSandbox = None }
+              FromSandbox = None; AgentData = None }
 
         append p.LedgerPath tx
         writeHead p tx.TxId
@@ -215,8 +209,8 @@ let checkout (p: RepoPaths) (txId: TxId) =
    
     let existing =
         Directory.EnumerateFiles(p.Root, "*", SearchOption.AllDirectories)
-        |> Seq.filter (fun f -> not (f.Contains("/.tl/") || f.Contains("\.tl\")))
-        |> Seq.map (fun f -> Path.GetRelativePath(p.Root, f).Replace('\', '/'))
+        |> Seq.filter (fun f -> not (f.Contains("/.tl/") || f.Contains("\\.tl\\")))
+        |> Seq.map (fun f -> Path.GetRelativePath(p.Root, f).Replace('\\', '/'))
 
     for relPath in existing do
         if not (Map.containsKey relPath tree) then
@@ -262,7 +256,7 @@ let rollback (p: RepoPaths) (targetTxId: TxId) (author: string) : Transaction =
           Author      = author
           Summary     = $"Rollback to {shortId targetTxId}"
           Changes     = changes @ deletions
-          FromSandbox = None }
+          FromSandbox = None; AgentData = None }
 
     append p.LedgerPath tx
     writeHead p tx.TxId
@@ -280,15 +274,10 @@ let status (p: RepoPaths) : (string * FileStatus) list =
 
     let idx = readIndex p
 
-    let isIgnored (f: string) =
-        let rel = Path.GetRelativePath(p.Root, f).Replace('\', '/')
-        rel.StartsWith(".tl/") || rel.StartsWith(".git/") || rel.StartsWith("bin/") || rel.StartsWith("obj/") ||
-        rel.Contains("/.tl/") || rel.Contains("/.git/") || rel.Contains("/bin/") || rel.Contains("/obj/")
-
     let workFiles =
         Directory.EnumerateFiles(p.Root, "*", SearchOption.AllDirectories)
-        |> Seq.filter (fun f -> not (isIgnored f))
-        |> Seq.map (fun f -> Path.GetRelativePath(p.Root, f).Replace('\', '/'))
+        |> Seq.filter (fun f -> not (f.Contains("/.tl/") || f.Contains("\\.tl\\")))
+        |> Seq.map (fun f -> Path.GetRelativePath(p.Root, f).Replace('\\', '/'))
         |> Set.ofSeq
 
     let allPaths = workFiles |> Set.union (headTree |> Map.keys |> Set.ofSeq)

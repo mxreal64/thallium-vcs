@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: MPL-2.0
 
 module Thallium.Tests.SandboxTests
 
@@ -20,7 +19,7 @@ let private makeGenesis objectsDir ledgerPath =
           Author      = "test"
           Summary     = "genesis"
           Changes     = []
-          FromSandbox = None }
+          FromSandbox = None; AgentData = None }
     append ledgerPath tx
     tx
 
@@ -68,7 +67,7 @@ let ``sandbox read falls through to base tree for unmodified files`` () =
         let genesis =
             { TxId = TxId (Guid.NewGuid().ToString("N")); ParentId = None
               Timestamp = DateTimeOffset.UtcNow; Author = "test"; Summary = "genesis"
-              Changes = [fc]; FromSandbox = None }
+              Changes = [fc]; FromSandbox = None; AgentData = None }
         append ledger genesis
 
         let sb = create genesis.TxId (TimeSpan.FromMinutes 5.0)
@@ -91,7 +90,7 @@ let ``sandbox delete marks file as absent in overlay`` () =
         let genesis =
             { TxId = TxId (Guid.NewGuid().ToString("N")); ParentId = None
               Timestamp = DateTimeOffset.UtcNow; Author = "test"; Summary = "genesis"
-              Changes = [fc]; FromSandbox = None }
+              Changes = [fc]; FromSandbox = None; AgentData = None }
         append ledger genesis
 
         let sb  = create genesis.TxId (TimeSpan.FromMinutes 5.0)

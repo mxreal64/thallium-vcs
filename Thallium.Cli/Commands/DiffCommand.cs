@@ -50,8 +50,8 @@ public static class DiffCommand
                 var aStr = ((Domain.TxId)txA).Item[..8];
                 var bStr = ((Domain.TxId)txB).Item[..8];
 
-                AnsiConsole.MarkupLine($"[dim]Comparing[/] [bold]{aStr}[/] [dim]→[/] [bold]{bStr}[/]
-");
+                AnsiConsole.MarkupLine($"[dim]Comparing[/] [bold]{aStr}[/] [dim]→[/] [bold]{bStr}[/]");
+                AnsiConsole.WriteLine();
 
                 var diffs = DiffEngine.diffTransactions(p.ObjectsDir, p.LedgerPath, txA, txB);
 

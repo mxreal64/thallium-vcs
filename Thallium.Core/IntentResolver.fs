@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: MPL-2.0
 
 module Thallium.Core.IntentResolver
 
@@ -68,6 +67,7 @@ let resolveIntent
     | Some _,  None    -> aiTag Remove
     | Some oldId, Some newId ->
         if oldId = newId then
+           
             if looksLikeMove fc.Path fc.Path then Move 
             else Unknown
         else
@@ -75,9 +75,8 @@ let resolveIntent
             let newBytes = lookupBlob newId
             let sim      = similarity oldBytes newBytes
 
-           
-            let extMatch = ext fc.Path <> ""
             if sim >= MoveThreshold then
+               
                 if looksLikeRename fc.Path fc.Path then Rename
                 else aiTag Modify
             elif sim >= RefactorThreshold then
@@ -93,29 +92,23 @@ let detectCrossFileMoves
     let removals = changes |> List.filter (fun fc -> fc.NewBlob.IsNone && fc.OldBlob.IsSome)
     let additions = changes |> List.filter (fun fc -> fc.OldBlob.IsNone && fc.NewBlob.IsSome)
 
+   
     let movePairs =
         [ for r in removals do
             for a in additions do
                 let rb = lookupBlob r.OldBlob.Value
                 let ab = lookupBlob a.NewBlob.Value
-                let sim = similarity rb ab
-               
-                if sim >= MoveThreshold || (Path.GetFileName(r.Path) = Path.GetFileName(a.Path) && sim >= 0.70) then
-                    yield (r.Path, a.Path, sim) ]
+                if similarity rb ab >= MoveThreshold then
+                    yield (r.Path, a.Path) ]
 
-    let movedSources = movePairs |> List.map (fun (s, _, _) -> s) |> Set.ofList
-    let movedTargets = movePairs |> List.map (fun (_, t, _) -> t) |> Set.ofList
-    let moveMetaMap  = movePairs |> List.map (fun (s, t, sim) -> t, (s, sim)) |> Map.ofList
+    let movedSources = movePairs |> List.map fst |> Set.ofList
+    let movedTargets = movePairs |> List.map snd |> Set.ofList
 
     changes |> List.map (fun fc ->
-        if movedSources.Contains fc.Path && (fc.Intent = Remove || fc.Intent = Unknown) then
-            { fc with Intent = Move; Annotation = Some "Moved to another directory" }
-        elif movedTargets.Contains fc.Path && (fc.Intent = Add || fc.Intent = Unknown) then
-            let annotation =
-                match Map.tryFind fc.Path moveMetaMap with
-                | Some (src, sim) -> Some $"Moved from '{src}' (similarity: {int (sim * 100.0)}%%)"
-                | None -> Some "Moved from another directory"
-            { fc with Intent = Move; Annotation = annotation }
+        if movedSources.Contains fc.Path && fc.Intent = Remove then
+            { fc with Intent = Move }
+        elif movedTargets.Contains fc.Path && fc.Intent = Add then
+            { fc with Intent = Move }
         else fc)
 
 let resolveAll

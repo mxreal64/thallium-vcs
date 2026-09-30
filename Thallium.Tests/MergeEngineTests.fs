@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: MPL-2.0
 
 module Thallium.Tests.MergeEngineTests
 
@@ -28,7 +27,7 @@ let private makeTx parentId author summary (changes: FileChange list) ledgerPath
           Author      = author
           Summary     = summary
           Changes     = changes
-          FromSandbox = None }
+          FromSandbox = None; AgentData = None }
     append ledgerPath tx
     tx
 
@@ -81,16 +80,13 @@ let ``conflict card emitted when both sides modify same file differently`` () =
         Directory.CreateDirectory objDir |> ignore
 
        
-        let baseBid = put objDir (mkBytes (String.replicate 50 "base line
-"))
+        let baseBid = put objDir (mkBytes (String.replicate 50 "base line\n"))
         let baseChange = fc "shared.fs" None (Some baseBid) Add
         let genesis = makeTx None "test" "genesis" [baseChange] ledger
 
        
-        let bidA = put objDir (mkBytes (String.replicate 50 "alice's version
-"))
-        let bidB = put objDir (mkBytes (String.replicate 50 "bob's version
-"))
+        let bidA = put objDir (mkBytes (String.replicate 50 "alice's version\n"))
+        let bidB = put objDir (mkBytes (String.replicate 50 "bob's version\n"))
 
         let txA = makeTx (Some genesis.TxId) "alice" "alice edit" [fc "shared.fs" (Some baseBid) (Some bidA) Modify] ledger
         let txB = makeTx (Some genesis.TxId) "bob"   "bob edit"   [fc "shared.fs" (Some baseBid) (Some bidB) Modify] ledger

@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: MPL-2.0
 
 module Thallium.Core.DashboardServer
 
@@ -112,7 +111,6 @@ let private htmlUi = """<!DOCTYPE html>
 <body>
   <header>
     <div class="brand">
-      <img src="/logo.png" alt="Logo" style="height: 32px; width: 32px; border-radius: 6px; object-fit: contain;">
       <h1>Thallium <span style="font-weight: 300; font-size: 1rem; color: var(--text-muted)">tl</span></h1>
       <span class="badge">AI-Native VCS</span>
     </div>
@@ -291,16 +289,6 @@ let startDashboard (repoDir: string) (port: int) =
                     resp.ContentType <- "text/html"
                     resp.ContentLength64 <- int64 bytes.Length
                     resp.OutputStream.Write(bytes, 0, bytes.Length)
-                    resp.Close()
-                elif path = "/logo.png" then
-                    let logoPath = Path.Combine(p.Root, "assets", "logo.png")
-                    if File.Exists logoPath then
-                        let bytes = File.ReadAllBytes logoPath
-                        resp.ContentType <- "image/png"
-                        resp.ContentLength64 <- int64 bytes.Length
-                        resp.OutputStream.Write(bytes, 0, bytes.Length)
-                    else
-                        resp.StatusCode <- 404
                     resp.Close()
                 elif path = "/api/state" then
                     let txs = Ledger.readAll p.LedgerPath
